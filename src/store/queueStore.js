@@ -1,33 +1,8 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-
-// ─── Initial data ─────────────────────────────────────────────────────────────
-const INITIAL_SERVICES = [
-  { id: 's1', nameEn: 'Haircut', nameGu: 'વાળ કાટ', minutes: 30, price: 150, active: true },
-  { id: 's2', nameEn: 'Beard Trim', nameGu: 'દાઢી', minutes: 15, price: 80, active: true },
-  { id: 's3', nameEn: 'Hair Spa', nameGu: 'હેર સ્પા', minutes: 45, price: 400, active: true },
-  { id: 's4', nameEn: 'Head Massage', nameGu: 'માથાની મસ્સાજ', minutes: 20, price: 120, active: true },
-  { id: 's5', nameEn: 'Colour', nameGu: 'રંગ', minutes: 60, price: 500, active: true },
-  { id: 's6', nameEn: 'Facial', nameGu: 'ફેશિયલ', minutes: 40, price: 300, active: true },
-]
-
-const INITIAL_BARBERS = [
-  { id: 'b1', name: 'Ravi', emoji: '👨‍🦱', onDuty: true, onBreak: false, currentCustomerId: null, serviceStartTime: null },
-  { id: 'b2', name: 'Amit', emoji: '👨‍🦲', onDuty: true, onBreak: false, currentCustomerId: null, serviceStartTime: null },
-  { id: 'b3', name: 'Imran', emoji: '🧔', onDuty: true, onBreak: false, currentCustomerId: null, serviceStartTime: null },
-]
+import { INITIAL_SERVICES, INITIAL_BARBERS, generateSeedQueue, INITIAL_TODAY_STATS } from '../../server/seedData.js'
 
 // ─── Queue logic helpers ───────────────────────────────────────────────────────
-let tokenCounter = 1
-
-function generateToken() {
-  return `S-${String(tokenCounter++).padStart(2, '0')}`
-}
-
-/**
- * Estimate wait time for a new customer based on:
- * total service minutes of all 'waiting' customers ahead / active barbers
- */
 function calcEstimatedWait(queue, barbers, selectedMinutes) {
   const activeBarbers = barbers.filter(b => b.onDuty && !b.onBreak && !b.currentCustomerId).length
   const busyBarbers = barbers.filter(b => b.currentCustomerId).length
@@ -40,12 +15,6 @@ function calcEstimatedWait(queue, barbers, selectedMinutes) {
   return Math.ceil((waitingTotal + selectedMinutes) / totalBarbers)
 }
 
-/**
- * Find the next customer for a barber, respecting preference rules.
- * Rules:
- * - barber X picks earliest customer who chose X or 'any'
- * - never give a customer who chose a different specific barber
- */
 function findNextForBarber(queue, barberId) {
   const waiting = queue
     .filter(c => c.status === 'waiting')
@@ -61,13 +30,14 @@ export const useQueueStore = create(
       // State
       services: INITIAL_SERVICES,
       barbers: INITIAL_BARBERS,
-      queue: [],
+      queue: generateSeedQueue(),
       queueOpen: true,
-      closingTime: '21:00', // 9 PM
+      closingTime: '21:00',
       lang: 'en',
       isStaffMode: false,
-      todayStats: { served: 0, totalWaitMin: 0, noShows: 0 },
-      _tokenCounter: 1,
+      todayStats: INITIAL_TODAY_STATS,
+      _tokenCounter: 8,
+      isConnectedToBackend: false,
 
       // ── Staff Mode ────────────────────────────────────────────────────
       setStaffMode: (enabled) => set({ isStaffMode: enabled }),
@@ -76,7 +46,14 @@ export const useQueueStore = create(
       setLang: (lang) => set({ lang }),
 
       // ── Queue open/close ──────────────────────────────────────────────
-      setQueueOpen: (open) => set({ queueOpen: open }),
+      setQueueOpen: (open) => {
+        set({ queueOpen: open })
+        fetch('/api/queue-toggle', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ open }),
+        }).catch(() => {})
+      },
 
       // ── Join Queue ────────────────────────────────────────────────────
       joinQueue: ({ name, phone, serviceIds, preferredBarberId }) => {
@@ -116,6 +93,13 @@ export const useQueueStore = create(
           _tokenCounter: state._tokenCounter + 1,
         }))
 
+        // Sync with backend API
+        fetch('/api/join', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, phone, serviceIds, preferredBarberId }),
+        }).catch(() => {})
+
         return { success: true, customerId: customer.id }
       },
 
@@ -139,6 +123,12 @@ export const useQueueStore = create(
           ),
         }))
 
+        fetch('/api/call-next', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ barberId }),
+        }).catch(() => {})
+
         return next
       },
 
@@ -156,6 +146,12 @@ export const useQueueStore = create(
               : b
           ),
         }))
+
+        fetch('/api/start-service', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ customerId }),
+        }).catch(() => {})
       },
 
       // ── Mark Done ─────────────────────────────────────────────────────
@@ -181,6 +177,12 @@ export const useQueueStore = create(
             totalWaitMin: todayStats.totalWaitMin + waitMin,
           },
         }))
+
+        fetch('/api/mark-done', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ customerId }),
+        }).catch(() => {})
       },
 
       // ── Mark No-show ──────────────────────────────────────────────────
@@ -199,9 +201,15 @@ export const useQueueStore = create(
             noShows: state.todayStats.noShows + 1,
           },
         }))
+
+        fetch('/api/no-show', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ customerId }),
+        }).catch(() => {})
       },
 
-      // ── Cancel ────────────────────────────────────────────────────────
+      // ── Cancel Spot ───────────────────────────────────────────────────
       cancelCustomer: (customerId) => {
         set(state => ({
           queue: state.queue.map(c =>
@@ -213,6 +221,12 @@ export const useQueueStore = create(
               : b
           ),
         }))
+
+        fetch('/api/cancel', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ customerId }),
+        }).catch(() => {})
       },
 
       // ── Barber Break Toggle ───────────────────────────────────────────
@@ -222,78 +236,155 @@ export const useQueueStore = create(
             b.id === barberId ? { ...b, onBreak: !b.onBreak } : b
           ),
         }))
+
+        fetch('/api/barber-break', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ barberId }),
+        }).catch(() => {})
       },
 
-      // ── Barber On Duty Toggle (admin) ─────────────────────────────────
+      // ── Barber Duty Toggle ────────────────────────────────────────────
       toggleBarberDuty: (barberId) => {
         set(state => ({
           barbers: state.barbers.map(b =>
             b.id === barberId ? { ...b, onDuty: !b.onDuty } : b
           ),
         }))
+
+        fetch('/api/barber-duty', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ barberId }),
+        }).catch(() => {})
       },
 
-      // ── Service Active Toggle (admin) ─────────────────────────────────
+      // ── Service Active Toggle ─────────────────────────────────────────
       toggleService: (serviceId) => {
         set(state => ({
           services: state.services.map(s =>
             s.id === serviceId ? { ...s, active: !s.active } : s
           ),
         }))
+
+        fetch('/api/service-toggle', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ serviceId }),
+        }).catch(() => {})
       },
 
-      // ── Update Service (admin) ────────────────────────────────────────
+      // ── Update Service ────────────────────────────────────────────────
       updateService: (serviceId, updates) => {
         set(state => ({
           services: state.services.map(s =>
             s.id === serviceId ? { ...s, ...updates } : s
           ),
         }))
+
+        fetch('/api/service-update', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ serviceId, updates }),
+        }).catch(() => {})
       },
 
-      // ── Computed helpers (not reactive — call inside components) ──────
-      getCustomerById: (id) => get().queue.find(c => c.id === id),
-
-      getActiveQueue: () =>
-        get().queue
-          .filter(c => ['waiting', 'called', 'inChair'].includes(c.status))
-          .sort((a, b) => a.joinedAt - b.joinedAt),
-
-      getPositionInQueue: (customerId) => {
-        const active = get()
-          .queue
-          .filter(c => c.status === 'waiting')
-          .sort((a, b) => a.joinedAt - b.joinedAt)
-        const idx = active.findIndex(c => c.id === customerId)
-        return idx === -1 ? null : idx + 1
+      // ── Re-seed Realistic Test Data ───────────────────────────────────
+      seedDatabase: async () => {
+        try {
+          const res = await fetch('/api/seed', { method: 'POST' })
+          const data = await res.json()
+          if (data?.state) {
+            set({
+              services: data.state.services,
+              barbers: data.state.barbers,
+              queue: data.state.queue,
+              queueOpen: data.state.queueOpen,
+              todayStats: data.state.todayStats,
+              _tokenCounter: data.state._tokenCounter || 8,
+            })
+          }
+        } catch {
+          // Fallback local seed
+          set({
+            services: INITIAL_SERVICES,
+            barbers: INITIAL_BARBERS,
+            queue: generateSeedQueue(),
+            todayStats: INITIAL_TODAY_STATS,
+            _tokenCounter: 8,
+          })
+        }
       },
 
-      getServiceById: (id) => get().services.find(s => s.id === id),
-
-      getBarberById: (id) => get().barbers.find(b => b.id === id),
-
-      getBarberByName: (name) =>
-        get().barbers.find(b => b.name.toLowerCase() === name.toLowerCase()),
-
-      refreshEstimates: () => {
-        const { queue, barbers, services } = get()
-        const updated = queue.map(c => {
-          if (c.status !== 'waiting') return c
-          const wait = calcEstimatedWait(
-            queue.filter(q => q.id !== c.id && q.joinedAt < c.joinedAt),
-            barbers,
-            c.totalMinutes
-          )
-          return { ...c, estimatedWaitMin: wait }
-        })
-        set({ queue: updated })
+      // ── Clear Queue ───────────────────────────────────────────────────
+      clearQueue: async () => {
+        try {
+          await fetch('/api/clear', { method: 'POST' })
+        } catch {}
+        set(state => ({
+          queue: [],
+          barbers: state.barbers.map(b => ({ ...b, currentCustomerId: null, serviceStartTime: null })),
+        }))
       },
 
       resetStats: () => set({ todayStats: { served: 0, totalWaitMin: 0, noShows: 0 } }),
     }),
     {
-      name: 'salon-queue-storage',
-      version: 1,
+      name: 'salon-queue-storage-v2',
+      version: 2,
     }
   )
 )
+
+// ─── Real-Time WebSocket & Initial Data Hydration ─────────────────────────
+if (typeof window !== 'undefined') {
+  // 1. Initial State Fetch from Database
+  fetch('/api/state')
+    .then(res => res.json())
+    .then(serverState => {
+      if (serverState && serverState.queue) {
+        useQueueStore.setState({
+          services: serverState.services,
+          barbers: serverState.barbers,
+          queue: serverState.queue,
+          queueOpen: serverState.queueOpen,
+          todayStats: serverState.todayStats,
+          _tokenCounter: serverState._tokenCounter || 8,
+          isConnectedToBackend: true,
+        })
+      }
+    })
+    .catch(() => {})
+
+  // 2. Real-time WebSocket connection
+  const setupWebSocket = () => {
+    try {
+      const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
+      const wsUrl = `${wsProtocol}//${window.location.host}/ws`
+      const socket = new WebSocket(wsUrl)
+
+      socket.onmessage = (event) => {
+        try {
+          const message = JSON.parse(event.data)
+          if (message.type === 'STATE_UPDATE' && message.payload) {
+            useQueueStore.setState({
+              services: message.payload.services,
+              barbers: message.payload.barbers,
+              queue: message.payload.queue,
+              queueOpen: message.payload.queueOpen,
+              todayStats: message.payload.todayStats,
+              _tokenCounter: message.payload._tokenCounter || 8,
+              isConnectedToBackend: true,
+            })
+          }
+        } catch {}
+      }
+
+      socket.onclose = () => {
+        setTimeout(setupWebSocket, 4000)
+      }
+    } catch {}
+  }
+
+  setupWebSocket()
+}

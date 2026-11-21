@@ -1,0 +1,152 @@
+export const INITIAL_SERVICES = [
+  { id: 's1', nameEn: 'Royal Signature Haircut', nameGu: 'રોયલ હેરકટ', minutes: 30, price: 150, active: true },
+  { id: 's2', nameEn: 'Beard Sculpting & Trim', nameGu: 'દાઢી સેટિંગ', minutes: 15, price: 80, active: true },
+  { id: 's3', nameEn: 'Luxury Hair Spa & Mask', nameGu: 'લક્ઝરી હેર સ્પા', minutes: 45, price: 400, active: true },
+  { id: 's4', nameEn: 'Stress-Relief Head Massage', nameGu: 'હેડ મસાજ', minutes: 20, price: 120, active: true },
+  { id: 's5', nameEn: 'Organic Beard & Hair Colour', nameGu: 'ઓર્ગેનિક કલર', minutes: 60, price: 500, active: true },
+  { id: 's6', nameEn: 'Gold Radiance Facial', nameGu: 'ગોલ્ડ ફેશિયલ', minutes: 40, price: 300, active: true },
+]
+
+export const INITIAL_BARBERS = [
+  { id: 'b1', name: 'Ravi', emoji: '👨‍🦱', onDuty: true, onBreak: false, currentCustomerId: 'c-01', serviceStartTime: Date.now() - 14 * 60 * 1000 },
+  { id: 'b2', name: 'Amit', emoji: '👨‍🦲', onDuty: true, onBreak: false, currentCustomerId: 'c-02', serviceStartTime: null },
+  { id: 'b3', name: 'Imran', emoji: '🧔', onDuty: true, onBreak: false, currentCustomerId: null, serviceStartTime: null },
+]
+
+export const generateSeedQueue = () => {
+  const now = Date.now()
+  return [
+    // In chair with Ravi
+    {
+      id: 'c-01',
+      token: 'S-01',
+      name: 'Aarav Patel',
+      phone: '9825012345',
+      serviceIds: ['s1', 's2'],
+      totalMinutes: 45,
+      totalPrice: 230,
+      preferredBarberId: 'b1',
+      assignedBarberId: 'b1',
+      status: 'inChair',
+      joinedAt: now - 35 * 60 * 1000,
+      calledAt: now - 16 * 60 * 1000,
+      startedAt: now - 14 * 60 * 1000,
+      doneAt: null,
+      estimatedWaitMin: 0,
+    },
+    // Called for Amit (Just announced, waiting to sit)
+    {
+      id: 'c-02',
+      token: 'S-02',
+      name: 'Rohan Verma',
+      phone: '9898023456',
+      serviceIds: ['s1'],
+      totalMinutes: 30,
+      totalPrice: 150,
+      preferredBarberId: 'any',
+      assignedBarberId: 'b2',
+      status: 'called',
+      joinedAt: now - 28 * 60 * 1000,
+      calledAt: now - 2 * 60 * 1000,
+      startedAt: null,
+      doneAt: null,
+      estimatedWaitMin: 0,
+    },
+    // Waiting #1 (Prefers Ravi)
+    {
+      id: 'c-03',
+      token: 'S-03',
+      name: 'Siddharth Joshi',
+      phone: '9712034567',
+      serviceIds: ['s3'],
+      totalMinutes: 45,
+      totalPrice: 400,
+      preferredBarberId: 'b1',
+      assignedBarberId: null,
+      status: 'waiting',
+      joinedAt: now - 22 * 60 * 1000,
+      calledAt: null,
+      startedAt: null,
+      doneAt: null,
+      estimatedWaitMin: 15,
+    },
+    // Waiting #2 (Fastest / Any barber)
+    {
+      id: 'c-04',
+      token: 'S-04',
+      name: 'Kunal Mehta',
+      phone: '9824045678',
+      serviceIds: ['s1', 's4'],
+      totalMinutes: 50,
+      totalPrice: 270,
+      preferredBarberId: 'any',
+      assignedBarberId: null,
+      status: 'waiting',
+      joinedAt: now - 18 * 60 * 1000,
+      calledAt: null,
+      startedAt: null,
+      doneAt: null,
+      estimatedWaitMin: 25,
+    },
+    // Waiting #3 (Fastest / Any barber)
+    {
+      id: 'c-05',
+      token: 'S-05',
+      name: 'Devendra Shah',
+      phone: '9909056789',
+      serviceIds: ['s2'],
+      totalMinutes: 15,
+      totalPrice: 80,
+      preferredBarberId: 'any',
+      assignedBarberId: null,
+      status: 'waiting',
+      joinedAt: now - 12 * 60 * 1000,
+      calledAt: null,
+      startedAt: null,
+      doneAt: null,
+      estimatedWaitMin: 35,
+    },
+    // Waiting #4 (Prefers Imran)
+    {
+      id: 'c-06',
+      token: 'S-06',
+      name: 'Vikramaditya Rao',
+      phone: '9879067890',
+      serviceIds: ['s1', 's2', 's4'],
+      totalMinutes: 65,
+      totalPrice: 350,
+      preferredBarberId: 'b3',
+      assignedBarberId: null,
+      status: 'waiting',
+      joinedAt: now - 8 * 60 * 1000,
+      calledAt: null,
+      startedAt: null,
+      doneAt: null,
+      estimatedWaitMin: 45,
+    },
+    // Waiting #5 (>60 min wait indicator test case)
+    {
+      id: 'c-07',
+      token: 'S-07',
+      name: 'Tirth Bhatt',
+      phone: '9825178901',
+      serviceIds: ['s6'],
+      totalMinutes: 40,
+      totalPrice: 300,
+      preferredBarberId: 'any',
+      assignedBarberId: null,
+      status: 'waiting',
+      joinedAt: now - 68 * 60 * 1000, // Joined 68 minutes ago -> triggers amber badge!
+      calledAt: null,
+      startedAt: null,
+      doneAt: null,
+      estimatedWaitMin: 60,
+    },
+  ]
+}
+
+export const INITIAL_TODAY_STATS = {
+  served: 6,
+  totalWaitMin: 110,
+  noShows: 1,
+}

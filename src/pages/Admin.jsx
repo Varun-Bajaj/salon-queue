@@ -7,18 +7,20 @@ import Navbar from '../components/Navbar'
 import ThreeBackground from '../components/ThreeBackground'
 import Card3D from '../components/Card3D'
 import { sound } from '../utils/audio'
-import { ChevronLeft, ShieldCheck, ToggleLeft, ToggleRight, Edit3, Check, DollarSign, Clock, Users, UserX, Scissors } from 'lucide-react'
+import { ChevronLeft, ShieldCheck, ToggleLeft, ToggleRight, Edit3, Check, DollarSign, Clock, Users, UserX, Scissors, Database, RefreshCw, Trash2, Sparkles } from 'lucide-react'
 
 export default function Admin() {
   const navigate = useNavigate()
   const t = useT()
   const {
-    services, barbers, queueOpen, todayStats, lang,
-    toggleService, toggleBarberDuty, setQueueOpen, updateService, resetStats
+    services, barbers, queueOpen, todayStats, lang, queue,
+    toggleService, toggleBarberDuty, setQueueOpen, updateService, resetStats,
+    seedDatabase, clearQueue, isConnectedToBackend
   } = useQueueStore()
 
   const [editingService, setEditingService] = useState(null)
   const [editForm, setEditForm] = useState({})
+  const [seeding, setSeeding] = useState(false)
 
   const avgWait = todayStats.served > 0
     ? Math.round(todayStats.totalWaitMin / todayStats.served)
@@ -123,6 +125,56 @@ export default function Admin() {
                 </div>
               </div>
             </Card3D>
+          </div>
+        </div>
+
+        {/* Database & Test Data Management */}
+        <div className="glass-panel-gold rounded-2xl p-5 border border-gold-500/30">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gold-500/20 text-gold-400 flex items-center justify-center shadow-gold-glow">
+                <Database className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="font-display font-bold text-white text-base">Salon Database Engine</h3>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-semibold flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+                    Live JSON DB Active
+                  </span>
+                </div>
+                <p className="text-white/50 text-xs">
+                  {queue.length} active records in memory & persisted to <code className="text-gold-300">server/salon_data.json</code>
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={async () => {
+                  sound.playGoldChime()
+                  setSeeding(true)
+                  await seedDatabase()
+                  setTimeout(() => setSeeding(false), 600)
+                }}
+                disabled={seeding}
+                className="btn-luxury-gold text-xs font-bold py-2 px-3.5 flex items-center gap-1.5"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-charcoal-950" />
+                <span>{seeding ? 'Seeding...' : 'Populate Demo Data'}</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  sound.playClick()
+                  clearQueue()
+                }}
+                className="px-3 py-2 rounded-xl bg-charcoal-900 border border-rose-500/30 text-rose-300 hover:bg-rose-500/10 text-xs font-mono transition-all flex items-center gap-1.5"
+              >
+                <Trash2 className="w-3.5 h-3.5 text-rose-400" />
+                <span>Clear Queue</span>
+              </button>
+            </div>
           </div>
         </div>
 
