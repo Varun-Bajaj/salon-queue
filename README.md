@@ -1,6 +1,8 @@
 # Salon Queue Management System
 
 **Live demo:** https://salon-queue-sandy.vercel.app  
+**GitHub Repository:** https://github.com/Varun-Bajaj/salon-queue  
+**Developer Profile:** https://github.com/Varun-Bajaj  
 **Hosted on:** Vercel (frontend) + Node/Express (backend)  
 **Staff Test PIN:** `1234` (or click "Quick Demo Staff Login")
 
