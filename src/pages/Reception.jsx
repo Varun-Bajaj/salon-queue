@@ -69,7 +69,8 @@ function WalkInModal({ onClose, t }) {
           <div>
             <label className="block text-white/60 text-xs mb-1 font-medium">{t.yourName}</label>
             <input
-              className="w-full bg-charcoal-900 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-gold-500"
+              style={{ backgroundColor: '#131722', color: '#ffffff' }}
+              className="w-full border border-white/20 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-gold-500"
               placeholder="e.g. Rahul Sharma"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -79,7 +80,8 @@ function WalkInModal({ onClose, t }) {
           <div>
             <label className="block text-white/60 text-xs mb-1 font-medium">{t.yourPhone}</label>
             <input
-              className="w-full bg-charcoal-900 border border-white/10 rounded-xl px-4 py-2.5 text-sm font-mono text-white focus:outline-none focus:border-gold-500"
+              style={{ backgroundColor: '#131722', color: '#ffffff' }}
+              className="w-full border border-white/20 rounded-xl px-4 py-2.5 text-sm font-mono text-white focus:outline-none focus:border-gold-500"
               placeholder="10-digit mobile number"
               maxLength={10}
               value={phone}

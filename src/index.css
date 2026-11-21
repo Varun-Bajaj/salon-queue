@@ -148,3 +148,20 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #D4A017;
 }
+
+/* Bulletproof Dark Inputs & Chrome Autofill visibility fix */
+input, select, textarea {
+  color-scheme: dark !important;
+  color: #ffffff !important;
+  background-color: #121620 !important;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px #121620 inset !important;
+  -webkit-text-fill-color: #ffffff !important;
+  caret-color: #ffffff !important;
+}
+

@@ -206,7 +206,8 @@ export default function Admin() {
                       <div>
                         <label className="text-[10px] text-white/40 font-mono">Title (EN)</label>
                         <input
-                          className="w-full bg-charcoal-900 border border-white/10 rounded-xl p-2 text-xs text-white"
+                          style={{ backgroundColor: '#131722', color: '#ffffff' }}
+                          className="w-full border border-white/20 rounded-xl p-2 text-xs text-white"
                           value={editForm.nameEn}
                           onChange={(e) => setEditForm((f) => ({ ...f, nameEn: e.target.value }))}
                         />
@@ -214,7 +215,8 @@ export default function Admin() {
                       <div>
                         <label className="text-[10px] text-white/40 font-mono">Title (GU)</label>
                         <input
-                          className="w-full bg-charcoal-900 border border-white/10 rounded-xl p-2 text-xs text-white"
+                          style={{ backgroundColor: '#131722', color: '#ffffff' }}
+                          className="w-full border border-white/20 rounded-xl p-2 text-xs text-white"
                           value={editForm.nameGu}
                           onChange={(e) => setEditForm((f) => ({ ...f, nameGu: e.target.value }))}
                         />
@@ -226,7 +228,8 @@ export default function Admin() {
                         <label className="text-[10px] text-white/40 font-mono">Price (₹)</label>
                         <input
                           type="number"
-                          className="w-full bg-charcoal-900 border border-white/10 rounded-xl p-2 text-xs text-white"
+                          style={{ backgroundColor: '#131722', color: '#ffffff' }}
+                          className="w-full border border-white/20 rounded-xl p-2 text-xs text-white"
                           value={editForm.price}
                           onChange={(e) => setEditForm((f) => ({ ...f, price: e.target.value }))}
                         />
@@ -235,7 +238,8 @@ export default function Admin() {
                         <label className="text-[10px] text-white/40 font-mono">Duration (Min)</label>
                         <input
                           type="number"
-                          className="w-full bg-charcoal-900 border border-white/10 rounded-xl p-2 text-xs text-white"
+                          style={{ backgroundColor: '#131722', color: '#ffffff' }}
+                          className="w-full border border-white/20 rounded-xl p-2 text-xs text-white"
                           value={editForm.minutes}
                           onChange={(e) => setEditForm((f) => ({ ...f, minutes: e.target.value }))}
                         />

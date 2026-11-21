@@ -65,8 +65,12 @@ export const useQueueStore = create(
       queueOpen: true,
       closingTime: '21:00', // 9 PM
       lang: 'en',
+      isStaffMode: false,
       todayStats: { served: 0, totalWaitMin: 0, noShows: 0 },
       _tokenCounter: 1,
+
+      // ── Staff Mode ────────────────────────────────────────────────────
+      setStaffMode: (enabled) => set({ isStaffMode: enabled }),
 
       // ── Language ──────────────────────────────────────────────────────
       setLang: (lang) => set({ lang }),

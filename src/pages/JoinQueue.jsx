@@ -162,18 +162,20 @@ export default function JoinQueue() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Name */}
               <div>
-                <label className="block text-white/60 text-xs font-medium mb-1.5">{t.yourName}</label>
+                <label className="block text-white/70 text-xs font-medium mb-1.5">{t.yourName}</label>
                 <div className="relative">
                   <input
                     type="text"
                     value={name}
                     placeholder="e.g. Varun Bajaj"
+                    autoComplete="off"
                     onChange={(e) => {
                       setName(e.target.value)
                       setErrors((er) => ({ ...er, name: null }))
                     }}
-                    className={`w-full bg-charcoal-900/90 border rounded-xl px-4 py-3 text-sm text-white placeholder-white/30 focus:outline-none transition-all ${
-                      errors.name ? 'border-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.3)]' : 'border-white/10 focus:border-gold-500'
+                    style={{ backgroundColor: '#131722', color: '#ffffff' }}
+                    className={`w-full rounded-xl px-4 py-3 text-sm font-medium text-white placeholder-slate-500 focus:outline-none transition-all border ${
+                      errors.name ? 'border-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.3)]' : 'border-white/20 focus:border-gold-500 focus:ring-1 focus:ring-gold-500'
                     }`}
                   />
                 </div>
@@ -182,24 +184,26 @@ export default function JoinQueue() {
 
               {/* Phone */}
               <div>
-                <label className="block text-white/60 text-xs font-medium mb-1.5">{t.yourPhone}</label>
+                <label className="block text-white/70 text-xs font-medium mb-1.5">{t.yourPhone}</label>
                 <div className="relative">
                   <input
                     type="tel"
                     maxLength={10}
                     value={phone}
                     placeholder="10-digit mobile"
+                    autoComplete="off"
                     onChange={(e) => {
                       setPhone(e.target.value.replace(/\D/g, ''))
                       setErrors((er) => ({ ...er, phone: null }))
                     }}
-                    className={`w-full bg-charcoal-900/90 border rounded-xl px-4 py-3 text-sm font-mono text-white placeholder-white/30 focus:outline-none transition-all ${
-                      errors.phone ? 'border-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.3)]' : 'border-white/10 focus:border-gold-500'
+                    style={{ backgroundColor: '#131722', color: '#ffffff' }}
+                    className={`w-full rounded-xl px-4 py-3 text-sm font-mono font-medium text-white placeholder-slate-500 focus:outline-none transition-all border ${
+                      errors.phone ? 'border-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.3)]' : 'border-white/20 focus:border-gold-500 focus:ring-1 focus:ring-gold-500'
                     }`}
                   />
                   {phone.length === 10 && (
                     <span className="absolute right-3 top-3.5 text-emerald-400">
-                      <Check className="w-4 h-4" />
+                      <Check className="w-4 h-4 stroke-[3]" />
                     </span>
                   )}
                 </div>
