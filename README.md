@@ -1,6 +1,6 @@
 # Salon Queue Management System
 
-**Live demo:** https://salon-queue-styleq.vercel.app  
+**Live demo:** https://salon-queue-sandy.vercel.app  
 **Hosted on:** Vercel (frontend) + Node/Express (backend)  
 **Staff Test PIN:** `1234` (or click "Quick Demo Staff Login")
 
