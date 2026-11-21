@@ -391,4 +391,16 @@ if (typeof window !== 'undefined') {
   }
 
   setupWebSocket()
+
+  // 3. Instant Cross-Tab Sync via Storage Event (ensures real-time sync on Vercel)
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'salon-queue-storage-v2' && e.newValue) {
+      try {
+        const parsed = JSON.parse(e.newValue)
+        if (parsed?.state) {
+          useQueueStore.setState(parsed.state)
+        }
+      } catch {}
+    }
+  })
 }
