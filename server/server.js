@@ -295,6 +295,6 @@ app.post('/api/clear', (req, res) => {
   res.json({ success: true })
 })
 
-server.listen(PORT, () => {
-  console.log(`💈 Salon Database & Realtime API Server listening on http://localhost:${PORT}`)
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`💈 Salon Database & Realtime API Server listening on http://127.0.0.1:${PORT}`)
 })

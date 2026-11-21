@@ -363,6 +363,10 @@ if (typeof window !== 'undefined') {
       const wsUrl = `${wsProtocol}//${window.location.host}/ws`
       const socket = new WebSocket(wsUrl)
 
+      socket.onerror = () => {
+        // Suppress browser console noise if server is cycling
+      }
+
       socket.onmessage = (event) => {
         try {
           const message = JSON.parse(event.data)

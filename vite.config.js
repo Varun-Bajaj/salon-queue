@@ -7,12 +7,22 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/api': {
-        target: 'http://localhost:5001',
+        target: 'http://127.0.0.1:5001',
         changeOrigin: true,
+        configure: (proxy) => {
+          proxy.on('error', () => {
+            // Suppress error spew if backend is starting
+          })
+        },
       },
       '/ws': {
-        target: 'ws://localhost:5001',
+        target: 'ws://127.0.0.1:5001',
         ws: true,
+        configure: (proxy) => {
+          proxy.on('error', () => {
+            // Suppress error spew if backend is starting
+          })
+        },
       },
     },
   },
